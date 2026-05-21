@@ -1,0 +1,60 @@
+{
+  "name": "@telaro/ars-solana",
+  "version": "0.1.0",
+  "description": "ARS-Solana — the Agentic Risk Standard principal-track lifecycle, implemented for the Telaro Solana program.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx/esm --test tests/*.test.ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "dependencies": {
+    "@telaro/sdk": "^0.1.2",
+    "@solana/web3.js": "^1.95.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Telaro-Protocol/ars-solana.git"
+  },
+  "homepage": "https://telaro.xyz",
+  "bugs": {
+    "url": "https://github.com/Telaro-Protocol/ars-solana/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ars",
+    "agentic-risk-standard",
+    "solana",
+    "telaro",
+    "settlement",
+    "x402"
+  ],
+  "type": "module",
+  "sideEffects": false
+}
