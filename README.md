@@ -4,13 +4,13 @@
 (ARS), implemented for Solana.**
 
 ARS splits an AI-agent job into a *fee track* and a *principal track*.
-`@telaro/ars-solana` implements the **principal track** — the
-underwriting → collateral → principal-release lifecycle for agents that
-handle user capital — backed by the Telaro program on Solana.
+`@telaro/ars-solana` implements the **principal track**: the
+underwriting, collateral, and principal-release lifecycle for agents
+that handle user capital, backed by the Telaro program on Solana.
 
-It is the Solana counterpart to ARS's EVM reference implementation: the
-ARS abstract layer, instantiated against an on-chain program that
-already ships bonding, slashing, a decentralized underwriter pool, and
+It is the Solana counterpart to ARS's EVM reference implementation. The
+ARS abstract layer runs against an on-chain program that already ships
+bonding, slashing, a decentralized underwriter pool, and
 under-collateralized credit.
 
 ## Install
@@ -23,17 +23,17 @@ npm install @telaro/ars-solana
 
 | Module | Role |
 | ------ | ---- |
-| `events.ts` | the principal-track event types — the job log is append-only |
-| `state.ts` | the event-sourced state machine — `replay()` derives the job |
-| `store.ts` | `EventStore` — append-only, validate-on-append event log |
-| `ingest.ts` | `toArsEvent` — Telaro on-chain events → ARS events |
-| `settlement.ts` | the `SettlementLayer` contract + Telaro instruction map |
-| `binding.ts` | ARS settlement actions → Telaro instructions (pure builders) |
-| `client.ts` | `TelaroSettlement` — the async client that sends them |
+| `events.ts` | Principal-track event types; an append-only job log |
+| `state.ts` | Event-sourced state machine; `replay()` derives the job |
+| `store.ts` | `EventStore`, an append-only, validate-on-append log |
+| `ingest.ts` | `toArsEvent`: maps Telaro on-chain events to ARS events |
+| `settlement.ts` | The `SettlementLayer` contract and Telaro instruction map |
+| `binding.ts` | ARS settlement actions to Telaro instructions (pure builders) |
+| `client.ts` | `TelaroSettlement`, the async client that sends them |
 
 ## Lifecycle
 
-A job carries no mutable state of its own — `replay()` folds an
+A job carries no mutable state of its own. `replay()` folds an
 append-only event log into the current job, matching the ARS reference
 design.
 
@@ -58,7 +58,7 @@ const job = replay([
 // job.state === "CLOSED"
 ```
 
-An illegal transition throws `ARSTransitionError` — the log can never
+An illegal transition throws `ARSTransitionError`, so the log can never
 fold into an invalid job. `EventStore` (`store.ts`) validates the same
 way on append.
 
@@ -66,8 +66,9 @@ way on append.
 
 `TelaroSettlement` implements the ARS `SettlementLayer` for Solana. Of
 the 8 ARS settlement methods, 6 map onto Telaro program instructions
-that already exist on-chain; the two `*Fee` methods are out of scope for
-v1 — Telaro is a capital-risk layer, not a generic service-fee escrow.
+that already exist on-chain. The two `*Fee` methods are out of scope for
+v1, since Telaro is a capital-risk layer, not a generic service-fee
+escrow.
 
 | ARS method | Telaro instruction |
 | ---------- | ------------------ |
@@ -87,8 +88,8 @@ const { signature } = await settlement.releasePrincipal(
 );
 ```
 
-Sending is abstracted behind a `TxSender`, so the same client runs
-against a live RPC (`connectionSender`) or an in-process test runtime.
+Sending goes through a `TxSender`, so the same client runs against a
+live RPC (`connectionSender`) or an in-process test runtime.
 
 ## Tests
 
@@ -96,26 +97,25 @@ against a live RPC (`connectionSender`) or an in-process test runtime.
 pnpm test
 ```
 
-runs the unit suite (37 tests) — the event-sourced lifecycle, the event
+runs the unit suite (37 tests): the event-sourced lifecycle, the event
 store, on-chain ingestion, and the settlement binding's instruction
 shapes (program id, discriminator, accounts).
 
-The settlement binding is additionally verified **end to end against the
-real compiled Telaro program** in an in-process Solana runtime (bankrun):
-each instruction is sent and the program's acceptance + state change
-asserted. That integration test and a narrated lifecycle demo live in
-the Telaro program repository.
+The settlement binding is also verified **end to end against the real
+compiled Telaro program** in an in-process Solana runtime (bankrun):
+each instruction is sent, and both the program's acceptance and the
+resulting state change are asserted. That integration test and a
+narrated lifecycle demo live in the Telaro program repository.
 
 ## Identity
 
 ARS `jobId` is the Telaro `action_hash`. Of the on-chain events, only
-`ActionRecorded` carries the action hash, so `toArsEvent` maps it
-self-contained; claim and credit events need the job id resolved by the
-caller. The off-chain half of the lifecycle (`JobOpened`,
-`UnderwritingStarted`/`Decided`) is produced by the settlement layer,
-not ingested from chain.
+`ActionRecorded` carries the action hash, so `toArsEvent` can map it on
+its own. Claim and credit events need the job id resolved by the caller.
+The off-chain half of the lifecycle (`JobOpened`,
+`UnderwritingStarted` and `UnderwritingDecided`) is produced by the
+settlement layer, not ingested from chain.
 
 ## License
 
 MIT
-# ars-solana
