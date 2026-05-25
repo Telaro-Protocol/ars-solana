@@ -1,7 +1,7 @@
 {
   "name": "@telaro/ars-solana",
-  "version": "0.1.1",
-  "description": "The Agentic Risk Standard (ARS), implemented for Solana. Event-sourced agent-job lifecycle and settlement bindings over the Telaro on-chain primitives.",
+  "version": "0.1.2",
+  "description": "The Agentic Risk Standard (ARS) implemented for Solana. Event-sourced agent-job lifecycle and settlement bindings on top of the Telaro program.",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.js",
