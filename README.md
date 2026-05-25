@@ -107,6 +107,15 @@ each instruction is sent, and both the program's acceptance and the
 resulting state change are asserted. That integration test and a
 narrated lifecycle demo live in the Telaro program repository.
 
+## Design
+
+The one-page mapping from the ARS abstract layer to the Telaro Anchor
+program is in [DESIGN.md](DESIGN.md), including the
+`SettlementLayer` and `CollateralVault` ABCs, the scope (principal
+track in v1, fee track deferred), and the design choice to back
+`pay_premium` with a program-controlled `UnderwriterPool` rather than
+a keyholder.
+
 ## Identity
 
 ARS `jobId` is the Telaro `action_hash`. Of the on-chain events, only
