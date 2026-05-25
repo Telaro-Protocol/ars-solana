@@ -9,7 +9,8 @@ keyholder.
 
 This document is the mapping table. The runnable artefact is the npm
 package (`npm install @telaro/ars-solana`) and the test suite in this
-repo (`pnpm test`).
+repo (`pnpm test`). The versioned profile (PDA layout, event schemas,
+conformance criteria) is [SPEC.md](SPEC.md).
 
 ## Scope
 

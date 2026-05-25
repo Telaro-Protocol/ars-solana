@@ -126,11 +126,10 @@ narrated lifecycle demo live in the Telaro program repository.
 ## Design
 
 The one-page mapping from the ARS abstract layer to the Telaro Anchor
-program is in [DESIGN.md](DESIGN.md), including the
-`SettlementLayer` and `CollateralVault` ABCs, the scope (principal
-track in v1, fee track deferred), and the design choice to back
-`pay_premium` with a program-controlled `UnderwriterPool` rather than
-a keyholder.
+program is in [DESIGN.md](DESIGN.md). The full versioned profile is
+[SPEC.md](SPEC.md): **ARS-Solana Profile v0.1** (PDA layout, event
+schemas, conformance criteria, invariants). This package is the
+reference implementation for the profile.
 
 ## Identity
 
