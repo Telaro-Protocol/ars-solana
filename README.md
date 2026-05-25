@@ -131,6 +131,12 @@ program is in [DESIGN.md](DESIGN.md). The full versioned profile is
 schemas, conformance criteria, invariants). This package is the
 reference implementation for the profile.
 
+A Python adapter that satisfies the same ARS abstract base classes
+against the Telaro Anchor program lives at [python/](python/) in this
+repo (`pip install telaro-ars` once published). It mirrors the TS
+state machine line for line; the conformance test corpus replays in
+both languages.
+
 ## Identity
 
 ARS `jobId` is the Telaro `action_hash`. Of the on-chain events, only

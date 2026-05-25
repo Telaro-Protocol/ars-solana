@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "telaro-ars"
+version = "0.1.0"
+description = "Python adapter for the ARS-Solana Profile. Subclass the ARS SettlementLayer ABC against the Telaro Anchor program."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Telaro", email = "hello@telaro.xyz" },
+]
+keywords = [
+    "ars",
+    "agentic-risk-standard",
+    "solana",
+    "telaro",
+    "x402",
+    "agent-payments",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "solders>=0.21.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Telaro-Protocol/ars-solana"
+Repository = "https://github.com/Telaro-Protocol/ars-solana"
+Issues = "https://github.com/Telaro-Protocol/ars-solana/issues"
+Spec = "https://github.com/Telaro-Protocol/ars-solana/blob/main/SPEC.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/telaro_ars"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
