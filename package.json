@@ -21,7 +21,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx/esm --test tests/*.test.ts",
     "clean": "rm -rf dist",
-    "prepublishOnly": "pnpm clean && pnpm build"
+    "prepublishOnly": "rm -rf dist && tsc -p tsconfig.json"
   },
   "dependencies": {
     "@telaro/sdk": "^0.1.2",
