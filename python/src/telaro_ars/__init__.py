@@ -56,6 +56,10 @@ from telaro_ars.binding import (
     pay_premium_intent,
     release_principal_intent,
     build_view_bond_ix,
+    build_resolve_claim_ix,
+    build_withdraw_bond_ix,
+    build_process_pool_yield_ix,
+    build_request_credit_ix,
 )
 from telaro_ars.constants import (
     PROGRAM_ID_DEVNET,
@@ -64,7 +68,7 @@ from telaro_ars.constants import (
     MAX_LEVERAGE_RATIO,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
@@ -106,6 +110,10 @@ __all__ = [
     "pay_premium_intent",
     "release_principal_intent",
     "build_view_bond_ix",
+    "build_resolve_claim_ix",
+    "build_withdraw_bond_ix",
+    "build_process_pool_yield_ix",
+    "build_request_credit_ix",
     # constants
     "PROGRAM_ID_DEVNET",
     "MIN_BOND_USDC_ATOMIC",

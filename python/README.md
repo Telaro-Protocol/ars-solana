@@ -100,22 +100,28 @@ intent = await s.lock_collateral(
 # -> InstructionIntent(method="view_bond", ..., args={...})
 ```
 
-## v0.1 scope
+## v0.2 scope
 
-Six of the eight ARS `SettlementLayer` methods are implemented on the
-intent layer. The two fee-track methods are intentionally deferred to
-v0.2 per [SPEC.md sections 1 and 10](../SPEC.md).
+All five in-scope `SettlementLayer` methods (principal track) ship
+with fully-encoded `Instruction` builders that produce a valid
+Solana `solders.instruction.Instruction` against the Telaro Anchor
+program:
 
-The chain-encoded `Instruction` is shipped only for `view_bond`
-(`build_view_bond_ix`); the other four are exposed as
-`InstructionIntent` objects with the correct accounts and args, so the
-caller can assemble them with their own Anchor IDL client. The encoded
-versions land in v0.2.
+| ABC method | Builder |
+| --- | --- |
+| `lock_collateral` | `build_view_bond_ix` |
+| `slash_collateral` | `build_resolve_claim_ix` |
+| `unlock_collateral` | `build_withdraw_bond_ix` |
+| `pay_premium` | `build_process_pool_yield_ix` |
+| `release_principal` | `build_request_credit_ix` |
 
-For everything else (multi-instruction job orchestration, actual
-chain sending, the full reference flow), use
-`@telaro/ars-solana` on npm in a Node sidecar process or wait for
-v0.2.
+PDAs (bond vault, deposit vault, credit line, pool config, pool
+vault, pool mint authority) are derived in-package against the seeds
+pinned in SPEC.md §3; the Python side and the TypeScript reference
+produce identical addresses for the same inputs.
+
+The three fee-track methods (`lock_fee`, `release_fee`, `refund_fee`)
+remain out of scope per SPEC.md §1 and §10 (deferred).
 
 ## Conformance with the TypeScript reference
 

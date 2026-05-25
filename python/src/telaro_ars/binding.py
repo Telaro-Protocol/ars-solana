@@ -255,35 +255,154 @@ def build_view_bond_ix(
     )
 
 
-# Stubs for the other four. They raise NotImplementedError with a
-# pointer to the npm reference so a caller doesn't silently send a
-# malformed instruction.
+# -------------------------------------------------------------------- #
+#  Encoded instructions (v0.2: the remaining four).                     #
+# -------------------------------------------------------------------- #
 
-def _not_implemented_yet(method: str) -> None:
-    raise NotImplementedError(
-        f"build_{method}_ix is reserved for v0.2 of telaro-ars. "
-        f"For v0.1, use the npm @telaro/ars-solana reference or call "
-        f"the chain via your own Anchor IDL client. The instruction "
-        f"intent (account ordering and args) is available via "
-        f"{method}_intent()."
+from telaro_ars.pda import (
+    bond_vault_pda,
+    credit_line_pda,
+    deposit_vault_pda,
+    pool_config_pda,
+    pool_mint_auth_pda,
+    pool_vault_pda,
+    SYSTEM_PROGRAM_ID,
+    TOKEN_PROGRAM_ID,
+)
+
+
+def _u64_le(value: int) -> bytes:
+    """Anchor u64 little-endian."""
+    if not (0 <= value <= 0xFFFFFFFFFFFFFFFF):
+        raise ValueError(f"u64 out of range: {value}")
+    return value.to_bytes(8, "little")
+
+
+def build_resolve_claim_ix(
+    params: SlashCollateralParams,
+    program_id: Pubkey = PROGRAM_ID_DEVNET,
+    *,
+    action: int = 0,
+) -> Instruction:
+    """
+    Build the `resolve_claim` instruction. `action=0` is the
+    builder-accept path that pays the claimer from the bond.
+
+    Account layout matches `buildResolveClaimIx` in `@telaro/sdk`
+    (sdk/src/instructions.ts).
+    """
+    if not (0 <= action <= 255):
+        raise ValueError("action must fit in u8 (0..255)")
+    bond_vault, _ = bond_vault_pda(params.agent, program_id)
+    deposit_vault, _ = deposit_vault_pda(params.claim, program_id)
+    data = _disc("resolve_claim") + bytes([action])
+    return Instruction(
+        program_id=program_id,
+        accounts=[
+            AccountMeta(pubkey=params.claim, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.agent, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.bond_mint, is_signer=False, is_writable=False),
+            AccountMeta(pubkey=bond_vault, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=deposit_vault, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.claimer_bond_ata, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.signer, is_signer=True, is_writable=False),
+            AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
+        ],
+        data=data,
     )
 
 
-def build_resolve_claim_ix(*_args, **_kwargs) -> Instruction:
-    _not_implemented_yet("slash_collateral")
-    raise AssertionError  # unreachable
+def build_withdraw_bond_ix(
+    params: UnlockCollateralParams,
+    program_id: Pubkey = PROGRAM_ID_DEVNET,
+) -> Instruction:
+    """
+    Build the `withdraw_bond` instruction. Releases up to `amount`
+    atomic USDC from the agent's bond vault to the controller's ATA,
+    subject to the on-chain 30-day cooldown and zero-open-claims rule.
+    """
+    bond_vault, _ = bond_vault_pda(params.agent, program_id)
+    data = _disc("withdraw_bond") + _u64_le(params.amount_atomic)
+    return Instruction(
+        program_id=program_id,
+        accounts=[
+            AccountMeta(pubkey=params.agent, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.bond_mint, is_signer=False, is_writable=False),
+            AccountMeta(pubkey=bond_vault, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.controller_bond_ata, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.controller, is_signer=True, is_writable=False),
+            AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
+        ],
+        data=data,
+    )
 
 
-def build_withdraw_bond_ix(*_args, **_kwargs) -> Instruction:
-    _not_implemented_yet("unlock_collateral")
-    raise AssertionError  # unreachable
+def build_process_pool_yield_ix(
+    params: PayPremiumParams,
+    program_id: Pubkey = PROGRAM_ID_DEVNET,
+    *,
+    source_ata: Pubkey | None = None,
+) -> Instruction:
+    """
+    Build the `process_pool_yield` instruction (the decentralised
+    `pay_premium` path: premium routes to the UnderwriterPool vault).
+
+    `params.payer` signs the SPL transfer; `params.underwriter` is
+    treated as the source-ATA holder if `source_ata` isn't given.
+    """
+    pool, _ = pool_config_pda(program_id)
+    vault, _ = pool_vault_pda(program_id)
+    data = _disc("process_pool_yield") + _u64_le(params.amount_atomic)
+    source = source_ata if source_ata is not None else params.underwriter
+    return Instruction(
+        program_id=program_id,
+        accounts=[
+            AccountMeta(pubkey=pool, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=vault, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=source, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=params.payer, is_signer=True, is_writable=False),
+            AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
+        ],
+        data=data,
+    )
 
 
-def build_process_pool_yield_ix(*_args, **_kwargs) -> Instruction:
-    _not_implemented_yet("pay_premium")
-    raise AssertionError  # unreachable
+def build_request_credit_ix(
+    params: ReleasePrincipalParams,
+    program_id: Pubkey = PROGRAM_ID_DEVNET,
+    *,
+    controller: Pubkey | None = None,
+) -> Instruction:
+    """
+    Build the `request_credit` instruction. Draws up to `amount`
+    atomic USDC from the UnderwriterPool against the agent's
+    CreditLine. Agent score must be at least 700.
 
-
-def build_request_credit_ix(*_args, **_kwargs) -> Instruction:
-    _not_implemented_yet("release_principal")
-    raise AssertionError  # unreachable
+    `controller` is the controller key that signs the request. Defaults
+    to `params.agent` only when caller doesn't pass one; in practice
+    the controller is distinct from the agent PDA and should be passed
+    explicitly.
+    """
+    if controller is None:
+        controller = params.agent
+    bond_vault, _ = bond_vault_pda(params.agent, program_id)
+    credit_line, _ = credit_line_pda(params.agent, program_id)
+    pool, _ = pool_config_pda(program_id)
+    pool_vault, _ = pool_vault_pda(program_id)
+    pool_mint_auth, _ = pool_mint_auth_pda(program_id)
+    data = _disc("request_credit") + _u64_le(params.amount_atomic)
+    return Instruction(
+        program_id=program_id,
+        accounts=[
+            AccountMeta(pubkey=params.agent, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=credit_line, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=bond_vault, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=pool, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=pool_vault, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=pool_mint_auth, is_signer=False, is_writable=False),
+            AccountMeta(pubkey=controller, is_signer=True, is_writable=True),
+            AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
+            AccountMeta(pubkey=SYSTEM_PROGRAM_ID, is_signer=False, is_writable=False),
+        ],
+        data=data,
+    )

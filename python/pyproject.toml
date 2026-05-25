@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "telaro-ars"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python adapter for the ARS-Solana Profile. Subclass the ARS SettlementLayer ABC against the Telaro Anchor program."
 readme = "README.md"
 license = { text = "MIT" }
