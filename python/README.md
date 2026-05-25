@@ -71,8 +71,8 @@ from telaro_ars import (
 )
 from solders.pubkey import Pubkey
 
-# Drop-in: subclass the upstream ABC, get a Telaro-backed
-# implementation. lock_collateral builds a real view_bond instruction.
+# Subclass the upstream ABC and get a Telaro-backed implementation.
+# lock_collateral builds a real view_bond instruction.
 class MySettlement(SettlementLayer):
     async def lock_collateral(self, job_id, agent_id, amount):
         return build_view_bond_ix(
