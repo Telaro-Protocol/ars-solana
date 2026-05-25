@@ -19,6 +19,22 @@ under-collateralized credit.
 npm install @telaro/ars-solana
 ```
 
+## 10-second look: the event-sourced job
+
+```ts
+import { applyEvent, replay, type ArsEvent } from "@telaro/ars-solana";
+
+const events: ArsEvent[] = [/* fetched from your store or the chain */];
+const job = replay(events);
+
+console.log(job.state);     // e.g. "RELEASABLE"
+console.log(job.collateral); // standing bond exposure for this job
+```
+
+`replay` is pure. There is no mutable job state on disk; the log *is* the
+state. See [DESIGN.md](DESIGN.md) for how each method maps to the Telaro
+Anchor program.
+
 ## Modules
 
 | Module | Role |
