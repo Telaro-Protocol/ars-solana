@@ -1,0 +1,265 @@
+{
+  "profile": "ARS-Solana Profile v0.1",
+  "state_vectors": [
+    {
+      "name": "awaiting underwriting after open",
+      "expected_state": "AWAIT_UNDERWRITING",
+      "expected_released_atomic": 0,
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1000000000,
+          "type": "JobOpened"
+        }
+      ]
+    },
+    {
+      "name": "rejected after failing underwriting",
+      "expected_state": "REJECTED",
+      "expected_released_atomic": 0,
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1000000000,
+          "type": "JobOpened"
+        },
+        {
+          "job_id": "j1",
+          "at": 2,
+          "type": "UnderwritingStarted"
+        },
+        {
+          "job_id": "j1",
+          "at": 3,
+          "passed": false,
+          "failure_code": "BOND_BELOW_MIN",
+          "type": "UnderwritingDecided"
+        }
+      ]
+    },
+    {
+      "name": "executing after one principal draw",
+      "expected_state": "EXECUTING",
+      "expected_released_atomic": 500000000,
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1000000000,
+          "type": "JobOpened"
+        },
+        {
+          "job_id": "j1",
+          "at": 2,
+          "type": "UnderwritingStarted"
+        },
+        {
+          "job_id": "j1",
+          "at": 3,
+          "passed": true,
+          "failure_code": null,
+          "type": "UnderwritingDecided"
+        },
+        {
+          "job_id": "j1",
+          "at": 4,
+          "amount_atomic": 500000000,
+          "type": "PrincipalReleased"
+        }
+      ]
+    },
+    {
+      "name": "closed (no dispute)",
+      "expected_state": "CLOSED",
+      "expected_released_atomic": 1000000000,
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1000000000,
+          "type": "JobOpened"
+        },
+        {
+          "job_id": "j1",
+          "at": 2,
+          "type": "UnderwritingStarted"
+        },
+        {
+          "job_id": "j1",
+          "at": 3,
+          "passed": true,
+          "failure_code": null,
+          "type": "UnderwritingDecided"
+        },
+        {
+          "job_id": "j1",
+          "at": 4,
+          "amount_atomic": 1000000000,
+          "type": "PrincipalReleased"
+        },
+        {
+          "job_id": "j1",
+          "at": 5,
+          "action_hash": "0xabc",
+          "outcome": "success",
+          "type": "EvidenceSubmitted"
+        },
+        {
+          "job_id": "j1",
+          "at": 6,
+          "resolution": "no_dispute",
+          "type": "Closed"
+        }
+      ]
+    },
+    {
+      "name": "closed via dispute upheld",
+      "expected_state": "CLOSED",
+      "expected_released_atomic": 1000000000,
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1000000000,
+          "type": "JobOpened"
+        },
+        {
+          "job_id": "j1",
+          "at": 2,
+          "type": "UnderwritingStarted"
+        },
+        {
+          "job_id": "j1",
+          "at": 3,
+          "passed": true,
+          "failure_code": null,
+          "type": "UnderwritingDecided"
+        },
+        {
+          "job_id": "j1",
+          "at": 4,
+          "amount_atomic": 1000000000,
+          "type": "PrincipalReleased"
+        },
+        {
+          "job_id": "j1",
+          "at": 5,
+          "action_hash": "0xabc",
+          "outcome": "failed",
+          "type": "EvidenceSubmitted"
+        },
+        {
+          "job_id": "j1",
+          "at": 6,
+          "claim": "C",
+          "type": "Disputed"
+        },
+        {
+          "job_id": "j1",
+          "at": 7,
+          "resolution": "dispute_upheld",
+          "type": "Closed"
+        }
+      ]
+    }
+  ],
+  "illegal_vectors": [
+    {
+      "name": "principal before underwriting",
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1,
+          "type": "JobOpened"
+        },
+        {
+          "job_id": "j1",
+          "at": 2,
+          "amount_atomic": 1,
+          "type": "PrincipalReleased"
+        }
+      ]
+    },
+    {
+      "name": "event for unknown job",
+      "log": [
+        {
+          "job_id": "ghost",
+          "at": 1,
+          "type": "UnderwritingStarted"
+        }
+      ]
+    },
+    {
+      "name": "event after terminal CLOSED",
+      "log": [
+        {
+          "job_id": "j1",
+          "at": 1,
+          "agent": "A",
+          "requestor": "D",
+          "exposure_atomic": 1,
+          "type": "JobOpened"
+        },
+        {
+          "job_id": "j1",
+          "at": 2,
+          "type": "UnderwritingStarted"
+        },
+        {
+          "job_id": "j1",
+          "at": 3,
+          "passed": false,
+          "failure_code": "X",
+          "type": "UnderwritingDecided"
+        },
+        {
+          "job_id": "j1",
+          "at": 4,
+          "type": "UnderwritingStarted"
+        }
+      ]
+    }
+  ],
+  "view_bond_vectors": [
+    {
+      "name": "zeros",
+      "min_bond_atomic": 0,
+      "min_score": 0,
+      "expected_data_hex": "3edf1f507bd084f000000000000000000000"
+    },
+    {
+      "name": "1 USDC, score 700",
+      "min_bond_atomic": 1000000,
+      "min_score": 700,
+      "expected_data_hex": "3edf1f507bd084f040420f0000000000bc02"
+    },
+    {
+      "name": "1000 USDC, score 800",
+      "min_bond_atomic": 1000000000,
+      "min_score": 800,
+      "expected_data_hex": "3edf1f507bd084f000ca9a3b000000002003"
+    },
+    {
+      "name": "u64-max bond, u16-max score",
+      "min_bond_atomic": 18446744073709551615,
+      "min_score": 65535,
+      "expected_data_hex": "3edf1f507bd084f0ffffffffffffffffffff"
+    }
+  ]
+}

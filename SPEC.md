@@ -173,17 +173,35 @@ the caller resolves their job id.
 
 ## 5. Conformance test
 
-An implementation is conformant if it can replay the events of any
-job from the reference test corpus to the same `Job` state. The
-reference corpus is the bankrun integration test suite in the
-Telaro program repo
+A conformance harness ships with the reference Python implementation
+at [`python/src/telaro_ars/conformance.py`](python/src/telaro_ars/conformance.py).
+A portable JSON dump of every test vector lives at
+[`tests/conformance-vectors.json`](tests/conformance-vectors.json) so
+implementations in any language can read it without parsing Python.
+
+The suite has three vector sets:
+
+| Set | Count | What it verifies |
+| --- | --- | --- |
+| `state_vectors` | 5 | Replaying the listed event log yields the named terminal `Job` state and `released_atomic` value. |
+| `illegal_vectors` | 3 | Replaying the listed log raises the implementation's transition error. |
+| `view_bond_vectors` | 4 | The encoded `view_bond` instruction data byte-matches the documented 18-byte layout (8 disc + 8 u64-LE bond + 2 u16-LE score). |
+
+The reference implementation is conformant: run
+`python -m telaro_ars.conformance` to see `state 5/5, illegal 3/3,
+view_bond 4/4`. The runtime check also lives in `tests/test_conformance.py`.
+
+Additional reference corpus (out of scope for the JSON dump but
+recommended): the bankrun integration test suite in the Telaro
+program repo
 ([`programs/telaro/tests/tests/ars-binding.test.ts`](https://github.com/Telaro-Protocol/telaro-protocol/blob/main/programs/telaro/tests/tests/ars-binding.test.ts))
 plus the demo at `programs/telaro/tests/tests/ars-lifecycle-demo.ts`.
 
-The reference implementation (`@telaro/ars-solana@^0.1`) passes 37
-unit tests for the state machine + event store + ingestion, and 5
-bankrun integration tests against the compiled program. Any
-conformant implementation should subsume this corpus.
+The TypeScript reference (`@telaro/ars-solana@^0.1`) passes 37 unit
+tests for the state machine + event store + ingestion, and 5 bankrun
+integration tests against the compiled program. The Python reference
+(`telaro-ars@^0.3`) passes 41 unit tests including the conformance
+harness.
 
 ## 6. Invariants
 
