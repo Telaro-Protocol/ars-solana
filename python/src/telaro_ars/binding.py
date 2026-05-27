@@ -5,24 +5,17 @@ Two surfaces here:
 
   1. `*_intent` functions return an `InstructionIntent`: a structured,
      readable description of what would be sent (program id, accounts,
-     args). Useful for logging, dry-run, and as the source of truth for
-     account ordering. Always available.
+     args). Useful for logging, dry-run, and as the source of truth
+     for account ordering.
 
   2. `build_*_ix` functions return a `solders.instruction.Instruction`
-     fully encoded and ready to assemble into a transaction. In v0.1
-     only `build_view_bond_ix` is implemented; the other four return
-     `NotImplementedError` and instead point the caller at the npm
-     reference implementation. They are tracked for v0.2 in SPEC.md
-     §10.
-
-Why ship a partial chain-encoding surface in v0.1: the `view_bond`
-gate-check call is by far the most-called instruction (every DApp
-that gates capital does it), and re-implementing it in Python lets
-the Python ARS user reach the chain without pulling in a Node
-runtime. The other four are write-path admin instructions called by
-the protocol operator, not by the typical ARS consumer, and are
-better re-implemented once the Anchor IDL is stable rather than
-hand-coded now.
+     fully encoded and ready to assemble into a transaction. All five
+     are implemented: `build_view_bond_ix`, `build_resolve_claim_ix`,
+     `build_withdraw_bond_ix`, `build_process_pool_yield_ix`,
+     `build_request_credit_ix`. Account layouts and data layouts
+     mirror the TypeScript SDK (`@telaro/sdk`, `src/instructions.ts`)
+     so a Python caller and a Node caller produce byte-identical
+     instructions for the same params.
 
 PDA layout is in SPEC.md §3. Instruction discriminators follow
 Anchor's `sha256("global:<name>")[:8]` rule.
@@ -118,8 +111,8 @@ class InstructionIntent:
     """
     A structured description of an instruction without on-chain
     encoding. Useful for dry-run, logging, and tests. The caller
-    converts to a real `solders.instruction.Instruction` either via
-    `build_*_ix` (where implemented) or via a v0.2 encoder.
+    converts to a real `solders.instruction.Instruction` via the
+    matching `build_*_ix` function.
     """
 
     method: str
@@ -219,7 +212,7 @@ def release_principal_intent(
 
 
 # -------------------------------------------------------------------- #
-#  Encoded instructions (v0.1: view_bond only).                         #
+#  Encoded instructions: view_bond.                                     #
 # -------------------------------------------------------------------- #
 
 
@@ -256,7 +249,8 @@ def build_view_bond_ix(
 
 
 # -------------------------------------------------------------------- #
-#  Encoded instructions (v0.2: the remaining four).                     #
+#  Encoded instructions: resolve_claim, withdraw_bond,                  #
+#  process_pool_yield, request_credit.                                  #
 # -------------------------------------------------------------------- #
 
 from telaro_ars.pda import (
