@@ -25,7 +25,7 @@ primitives.
 | `abc.py` | `SettlementLayer` / `CollateralVault` ABCs, mirrored from t54 upstream |
 | `events.py` | Principal-track event types (`JobOpened`, `UnderwritingDecided`, ...) |
 | `state.py` | `replay()` / `apply_event()`. Pure, no chain. Mirrors `src/state.ts` byte for byte. |
-| `binding.py` | `*_intent` describes the on-chain call; `build_view_bond_ix` encodes it for v0.1 |
+| `binding.py` | `*_intent` describes the on-chain call; `build_*_ix` (five of them) encode bytes-identical to `@telaro/sdk` |
 | `settlement.py` | `TelaroSettlement` concrete impl + `TELARO_SETTLEMENT_MAP` |
 | `constants.py` | Program id, bond floor, leverage cap |
 
@@ -100,7 +100,7 @@ intent = await s.lock_collateral(
 # -> InstructionIntent(method="view_bond", ..., args={...})
 ```
 
-## v0.2 scope
+## Encoded instruction builders
 
 All five in-scope `SettlementLayer` methods (principal track) ship
 with fully-encoded `Instruction` builders that produce a valid
